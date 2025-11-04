@@ -98,14 +98,14 @@ classdef SimpleColorGrader < matlab.apps.AppBase
                     app.CurrentImage = img;
 
                     % Display image on both axes
-                    imshow(app.OriginalAxes, app.OriginalImage);
-                    imshow(app.PreviewAxes, app.CurrentImage);
+                    imshow(app.OriginalImage, 'Parent', app.OriginalAxes);
+                    imshow(app.CurrentImage, 'Parent', app.PreviewAxes);
 
                     % Reset slider
                     app.BrightnessSlider.Value = 0;
 
                 catch ME
-                    uialert(app, ['Cannot load image: ' ME.message], 'Load Error');
+                    uialert(app.UIFigure, ['Cannot load image: ' ME.message], 'Load Error');
                 end
             end
         end
@@ -113,7 +113,7 @@ classdef SimpleColorGrader < matlab.apps.AppBase
         % "Save Image" button pushed function
         function SaveButtonPushed(app, event)
             if isempty(app.CurrentImage)
-                uialert(app, 'No image to save.', 'Save Error');
+                uialert(app.UIFigure, 'No image to save.', 'Save Error');
                 return;
             end
             [file, path] = uiputfile({'*.png', 'PNG Image'}, 'Save Image');
@@ -129,7 +129,7 @@ classdef SimpleColorGrader < matlab.apps.AppBase
         function ResetButtonPushed(app, event)
             if ~isempty(app.OriginalImage)
                 app.CurrentImage = app.OriginalImage;
-                imshow(app.PreviewAxes, app.CurrentImage);
+                imshow(app.CurrentImage, 'Parent', app.PreviewAxes);
                 app.BrightnessSlider.Value = 0;
             end
         end
