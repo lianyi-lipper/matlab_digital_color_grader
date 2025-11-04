@@ -2,10 +2,12 @@ classdef SimpleColorGrader < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure      matlab.ui.Figure
-        OriginalAxes  matlab.ui.control.UIAxes
-        PreviewAxes   matlab.ui.control.UIAxes
-        LoadButton    matlab.ui.control.Button
+        UIFigure         matlab.ui.Figure
+        OriginalPanel    matlab.ui.container.Panel
+        PreviewPanel     matlab.ui.container.Panel
+        OriginalAxes     matlab.graphics.axis.Axes
+        PreviewAxes      matlab.graphics.axis.Axes
+        LoadButton       matlab.ui.control.Button
         SaveButton    matlab.ui.control.Button
         ResetButton   matlab.ui.control.Button
         BrightnessLabel matlab.ui.control.Label
@@ -29,15 +31,25 @@ classdef SimpleColorGrader < matlab.apps.AppBase
             app.UIFigure.Position = [100 100 820 500];
             app.UIFigure.Name = 'Simple Digital Color Grader';
 
+            % Create OriginalPanel
+            app.OriginalPanel = uipanel(app.UIFigure);
+            app.OriginalPanel.Title = 'Original Image';
+            app.OriginalPanel.Position = [20 120 380 360];
+
             % Create OriginalAxes
-            app.OriginalAxes = uiaxes(app.UIFigure);
-            title(app.OriginalAxes, 'Original Image')
-            app.OriginalAxes.Position = [20 120 380 360];
+            app.OriginalAxes = axes('Parent', app.OriginalPanel, 'OuterPosition', [0 0 1 1]);
+            app.OriginalAxes.XTick = [];
+            app.OriginalAxes.YTick = [];
+
+            % Create PreviewPanel
+            app.PreviewPanel = uipanel(app.UIFigure);
+            app.PreviewPanel.Title = 'Preview';
+            app.PreviewPanel.Position = [420 120 380 360];
 
             % Create PreviewAxes
-            app.PreviewAxes = uiaxes(app.UIFigure);
-            title(app.PreviewAxes, 'Preview')
-            app.PreviewAxes.Position = [420 120 380 360];
+            app.PreviewAxes = axes('Parent', app.PreviewPanel, 'OuterPosition', [0 0 1 1]);
+            app.PreviewAxes.XTick = [];
+            app.PreviewAxes.YTick = [];
 
             % Create LoadButton
             app.LoadButton = uibutton(app.UIFigure, 'push');
@@ -98,8 +110,8 @@ classdef SimpleColorGrader < matlab.apps.AppBase
                     app.CurrentImage = img;
 
                     % Display image on both axes
-                    imshow(app.OriginalImage, 'Parent', app.OriginalAxes);
-                    imshow(app.CurrentImage, 'Parent', app.PreviewAxes);
+                    imshow(app.OriginalAxes, app.OriginalImage);
+                    imshow(app.PreviewAxes, app.CurrentImage);
 
                     % Reset slider
                     app.BrightnessSlider.Value = 0;
@@ -129,7 +141,7 @@ classdef SimpleColorGrader < matlab.apps.AppBase
         function ResetButtonPushed(app, event)
             if ~isempty(app.OriginalImage)
                 app.CurrentImage = app.OriginalImage;
-                imshow(app.CurrentImage, 'Parent', app.PreviewAxes);
+                imshow(app.PreviewAxes, app.CurrentImage);
                 app.BrightnessSlider.Value = 0;
             end
         end
