@@ -56,8 +56,8 @@ function SimpleColorGrader()
             img = imread(fullPath);
             handles.OriginalImage = img;
             handles.CurrentImage = img;
-            imshow(handles.OriginalAxes, handles.OriginalImage);
-            imshow(handles.PreviewAxes, handles.CurrentImage);
+            imshow(handles.OriginalImage, 'Parent', handles.OriginalAxes);
+            imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes);
             handles.BrightnessSlider.Value = 0;
             guidata(hFig, handles);
         catch ME
@@ -86,7 +86,7 @@ function SimpleColorGrader()
         handles = guidata(hFig);
         if ~isempty(handles.OriginalImage)
             handles.CurrentImage = handles.OriginalImage;
-            imshow(handles.PreviewAxes, handles.CurrentImage);
+            imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes);
             handles.BrightnessSlider.Value = 0;
             guidata(hFig, handles);
         end
