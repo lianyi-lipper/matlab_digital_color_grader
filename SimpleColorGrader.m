@@ -1,90 +1,86 @@
 function SimpleColorGrader()
-    % Create the main figure
-    hFig = figure('Name', 'Simple Digital Color Grader', ...
-                  'Position', [100 100 820 500], ...
-                  'NumberTitle', 'off', ...
-                  'MenuBar', 'figure', ...
-                  'Resize', 'off');
+% 创建主窗口
+hFig = figure('Name', '简易数字调色台', ...
+'Position', [100 100 820 500], ...
+'NumberTitle', 'off', ...
+'MenuBar', 'figure', ...
+'Resize', 'off');
 
 % === 在这里添加菜单栏代码 ===
-hMenuHelp = uimenu(hFig, 'Label', '帮助(Help)');
-uimenu(hMenuHelp, 'Label', '使用说明 (Usage)', 'Callback', @ShowHelpCallback);
-uimenu(hMenuHelp, 'Label', '关于 (About)', 'Callback', @ShowAboutCallback);
+hMenuHelp = uimenu(hFig, 'Label', '帮助');
+uimenu(hMenuHelp, 'Label', '使用说明', 'Callback', @ShowHelpCallback);
+uimenu(hMenuHelp, 'Label', '关于', 'Callback', @ShowAboutCallback);
 % === 菜单栏代码结束 ===
 
-    % Create data structure to hold handles and images
-    handles.OriginalImage = [];
-    handles.CurrentImage = [];
+% 创建用于存储句柄和图像的数据结构
+handles.OriginalImage = [];
+handles.CurrentImage = [];
 
-    % Create UI Panels
-    hOriginalPanel = uipanel(hFig, 'Title', 'Original Image', 'Position', [0.025 0.24 0.46 0.72]);
-    hPreviewPanel = uipanel(hFig, 'Title', 'Preview', 'Position', [0.515 0.24 0.46 0.72]);
+% 创建界面面板
+hOriginalPanel = uipanel(hFig, 'Title', '原始图像', 'Position', [0.025 0.24 0.46 0.72]);
+hPreviewPanel = uipanel(hFig, 'Title', '预览', 'Position', [0.515 0.24 0.46 0.72]);
 
-    % Create Axes
-    handles.OriginalAxes = axes('Parent', hOriginalPanel, 'Position', [0 0 1 1]);
-    handles.PreviewAxes = axes('Parent', hPreviewPanel, 'Position', [0 0 1 1]);
-    axis(handles.OriginalAxes, 'off');
-    axis(handles.PreviewAxes, 'off');
+% 创建坐标轴
+handles.OriginalAxes = axes('Parent', hOriginalPanel, 'Position', [0 0 1 1]);
+handles.PreviewAxes = axes('Parent', hPreviewPanel, 'Position', [0 0 1 1]);
+axis(handles.OriginalAxes, 'off');
+axis(handles.PreviewAxes, 'off');
 
-    % Create Buttons
-    uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Load Image', ...
-              'Position', [40, 70, 100, 22], ...
-              'Callback', @LoadButtonPushed);
-    uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Save Image', ...
-              'Position', [160, 70, 100, 22], ...
-              'Callback', @SaveButtonPushed);
-    handles.ResetButton = uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Reset', ...
-                                    'Position', [280, 70, 100, 22], ...
-                                    'Callback', @ResetButtonPushed);
+% 创建按钮
+uicontrol(hFig, 'Style', 'pushbutton', 'String', '加载图片', ...
+'Position', [40, 70, 100, 22], ...
+'Callback', @LoadButtonPushed);
+uicontrol(hFig, 'Style', 'pushbutton', 'String', '保存图片', ...
+'Position', [160, 70, 100, 22], ...
+'Callback', @SaveButtonPushed);
+handles.ResetButton = uicontrol(hFig, 'Style', 'pushbutton', 'String', '重置', ...
+'Position', [280, 70, 100, 22], ...
+'Callback', @ResetButtonPushed);
 
-    % Create Slider and Label
-    uicontrol(hFig, 'Style', 'text', 'String', 'Brightness', ...
-              'Position', [40, 30, 100, 22]);
-    handles.BrightnessSlider = uicontrol(hFig, 'Style', 'slider', ...
-                                         'Min', -100, 'Max', 100, 'Value', 0, ...
-                                         'Position', [160, 40, 640, 20]);
+% 创建滑块和标签
+uicontrol(hFig, 'Style', 'text', 'String', '亮度', ...
+'Position', [40, 30, 100, 22]);
+handles.BrightnessSlider = uicontrol(hFig, 'Style', 'slider', ...
+'Min', -100, 'Max', 100, 'Value', 0, ...
+'Position', [160, 40, 640, 20]);
 
-% === 在这里添加新代码 ===
-% --- Contrast Slider ---
-uicontrol(hFig, 'Style', 'text', 'String', 'Contrast', ...
+% --- 对比度滑块 ---
+uicontrol(hFig, 'Style', 'text', 'String', '对比度', ...
 'Position', [40, 5, 100, 22]);
 handles.ContrastSlider = uicontrol(hFig, 'Style', 'slider', ...
 'Min', 0, 'Max', 2, 'Value', 1, ... % 0=最低, 1=不变, 2=最高
 'Position', [160, 15, 200, 20]); % 调整了位置
 
-% --- Saturation Slider ---
-uicontrol(hFig, 'Style', 'text', 'String', 'Saturation', ...
+% --- 饱和度滑块 ---
+uicontrol(hFig, 'Style', 'text', 'String', '饱和度', ...
 'Position', [400, 5, 100, 22]); % 调整了位置
 handles.SaturationSlider = uicontrol(hFig, 'Style', 'slider', ...
 'Min', 0, 'Max', 2, 'Value', 1, ... % 0=黑白, 1=不变, 2=高饱和
 'Position', [500, 15, 300, 20]); % 调整了位置
-% === 新代码结束 ===
 
-% === 在这里添加第三阶段的控件 ===
-% --- Sharpness Slider (Blur < 0 | Sharpen > 0) ---
-uicontrol(hFig, 'Style', 'text', 'String', 'Sharpness', ...
+% --- 锐度滑块 (小于0模糊 | 大于0锐化) ---
+uicontrol(hFig, 'Style', 'text', 'String', '锐度', ...
 'Position', [40, 95, 100, 22]);
 handles.SharpnessSlider = uicontrol(hFig, 'Style', 'slider', ...
 'Min', -1, 'Max', 1, 'Value', 0, ...
 'Position', [160, 105, 200, 20]);
 
-% --- Film Grain Slider ---
-uicontrol(hFig, 'Style', 'text', 'String', 'Film Grain', ...
+% --- 胶片颗粒滑块 ---
+uicontrol(hFig, 'Style', 'text', 'String', '胶片颗粒', ...
 'Position', [400, 95, 100, 22]);
 handles.GrainSlider = uicontrol(hFig, 'Style', 'slider', ...
 'Min', 0, 'Max', 0.1, 'Value', 0, ... % 0 到 0.1 的方差
 'Position', [500, 105, 200, 20]);
 
-% --- HistEq Checkbox ---
+% --- 直方图均衡化复选框 ---
 handles.HistEqCheckbox = uicontrol(hFig, 'Style', 'checkbox', ...
-'String', '一键增强 (HistEq)', ...
-'Value', 0, ... % 0 = off, 1 = on
+'String', '一键增强 (直方图均衡)', ...
+'Value', 0, ... % 0 = 关闭, 1 = 开启
 'Position', [720, 105, 100, 20]);
-% === 第三阶段控件结束 ===
 
 
-    % Store handles structure
-    guidata(hFig, handles); % 保存一次 handles，确保滑块已创建
+% 存储 handles 结构
+guidata(hFig, handles); % 保存一次 handles，确保滑块已创建
 
 % --- 绑定监听器以实现实时预览 ---
 % 告诉 MATLAB，只要这些滑块的值在变，就去调用 @UpdatePreview
@@ -92,71 +88,69 @@ addlistener(handles.BrightnessSlider, 'ContinuousValueChange', @UpdatePreview);
 addlistener(handles.ContrastSlider, 'ContinuousValueChange', @UpdatePreview);
 addlistener(handles.SaturationSlider, 'ContinuousValueChange', @UpdatePreview);
 
-% === 在这里添加新监听器 ===
 addlistener(handles.SharpnessSlider, 'ContinuousValueChange', @UpdatePreview);
 addlistener(handles.GrainSlider, 'ContinuousValueChange', @UpdatePreview);
 % 复选框使用 'Callback' 属性，当它被点击时，也调用 UpdatePreview
 set(handles.HistEqCheckbox, 'Callback', @UpdatePreview);
-% === 新监听器结束 ===
 
-    % --- Nested Callback Functions ---
+% --- 嵌套回调函数 ---
 
-    function LoadButtonPushed(~, ~)
-        handles = guidata(hFig);
-        [file, path] = uigetfile({'*.jpg;*.png;*.bmp', 'Image Files'}, 'Select Image');
-        if isequal(file, 0)
-            disp('User canceled selection');
-            return;
-        end
+function LoadButtonPushed(~, ~)
+handles = guidata(hFig);
+[file, path] = uigetfile({'*.jpg;*.png;*.bmp', '图片文件'}, '选择图片');
+if isequal(file, 0)
+disp('用户取消了选择');
+return;
+end
 
-        fullPath = fullfile(path, file);
-        try
-            img = imread(fullPath);
-            handles.OriginalImage = img;
+fullPath = fullfile(path, file);
+try
+img = imread(fullPath);
+handles.OriginalImage = img;
 
-            % === 性能优化：创建并存储缩略图 ===
-            % 将图像缩放到固定宽度800像素，保持高宽比
-            preview_width = 800;
-            img_height = size(img, 1);
-            img_width = size(img, 2);
-            preview_height = round(img_height * (preview_width / img_width));
+% === 性能优化：创建并存储缩略图 ===
+% 将图像缩放到固定宽度800像素，保持高宽比
+preview_width = 800;
+img_height = size(img, 1);
+img_width = size(img, 2);
+preview_height = round(img_height * (preview_width / img_width));
 
-            handles.ThumbnailImage = imresize(img, [preview_height, preview_width]);
-            % ===================================
+handles.ThumbnailImage = imresize(img, [preview_height, preview_width]);
+% ===================================
 
-            handles.CurrentImage = handles.ThumbnailImage; % 初始预览也用缩略图
+handles.CurrentImage = handles.ThumbnailImage; % 初始预览也用缩略图
 
-            imshow(handles.OriginalImage, 'Parent', handles.OriginalAxes);
-            % imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes); % <--- 下一行会覆盖它
+imshow(handles.OriginalImage, 'Parent', handles.OriginalAxes);
+% imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes); % <--- 下一行会覆盖它
 
-            % 重置所有滑块
-            handles.BrightnessSlider.Value = 0;
-            handles.ContrastSlider.Value = 1;
-            handles.SaturationSlider.Value = 1;
-            handles.SharpnessSlider.Value = 0;
-            handles.GrainSlider.Value = 0;
-            handles.HistEqCheckbox.Value = 0;
+% 重置所有滑块
+handles.BrightnessSlider.Value = 0;
+handles.ContrastSlider.Value = 1;
+handles.SaturationSlider.Value = 1;
+handles.SharpnessSlider.Value = 0;
+handles.GrainSlider.Value = 0;
+handles.HistEqCheckbox.Value = 0;
 
-            guidata(hFig, handles);
+guidata(hFig, handles);
 
-            % !! 加载后，手动调用一次 UpdatePreview 来显示正确的缩略图 !!
-            UpdatePreview(); % 确保预览区显示的是处理后的缩略图
+% !! 加载后，手动调用一次 UpdatePreview 来显示正确的缩略图 !!
+UpdatePreview(); % 确保预览区显示的是处理后的缩略图
 
-        catch ME
-            msgbox(['Cannot load image: ' ME.message], 'Load Error', 'error');
-        end
-    end
+catch ME
+msgbox(['无法加载图片: ' ME.message], '加载错误', 'error');
+end
+end
 
 function SaveButtonPushed(~, ~)
 handles = guidata(hFig);
 if isempty(handles.OriginalImage) % <-- 改为检查 OriginalImage
-msgbox('No image to save.', 'Save Error', 'error');
+msgbox('没有可保存的图片。', '保存错误', 'error');
 return;
 end
 
-[file, path] = uiputfile({'*.png', 'PNG Image'}, 'Save Image');
+[file, path] = uiputfile({'*.png', 'PNG Image'}, '保存图片');
 if isequal(file, 0)
-disp('User canceled save');
+disp('用户取消了保存');
 return;
 end
 
@@ -175,7 +169,7 @@ img_to_save = ProcessImage(handles.OriginalImage, handles);
 imwrite(img_to_save, fullPath);
 
 catch ME
-msgbox(['Save failed: ' ME.message], 'Save Error', 'error');
+msgbox(['保存失败: ' ME.message], '保存错误', 'error');
 end
 
 % 4. 恢复鼠标
@@ -289,11 +283,11 @@ end
 function ShowHelpCallback(~, ~)
 title = '使用说明';
 msg = {
-'1. 点击 [Load Image] 加载一张图片。'
+'1. 点击 [加载图片] 加载一张图片。'
 '2. 拖动下方的滑块，实时预览调色效果。'
 '3. 勾选 [一键增强] 可自动优化对比度。'
-'4. 点击 [Save Image] 保存处理后的图片。'
-'5. 点击 [Reset] 恢复到原始图像和默认设置。'
+'4. 点击 [保存图片] 保存处理后的图片。'
+'5. 点击 [重置] 恢复到原始图像和默认设置。'
 };
 msgbox(msg, title, 'help');
 end
