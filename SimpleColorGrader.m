@@ -209,7 +209,7 @@ if sharpnessVal > 0 % 锐化
 img_processed = imsharpen(img_processed, 'Amount', sharpnessVal * 2);
 elseif sharpnessVal < 0 % 模糊
 % 'Sigma' 模糊半径
-img_processed = imgaussfilt(img_processed, 'Sigma', abs(sharpnessVal) * 3);
+img_processed = imgaussfilt(img_processed, abs(sharpnessVal) * 3);
 end
 % (如果 sharpnessVal == 0, 则什么都不做)
 
