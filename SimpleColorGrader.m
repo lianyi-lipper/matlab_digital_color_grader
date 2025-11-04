@@ -1,179 +1,94 @@
-classdef SimpleColorGrader < matlab.apps.AppBase
+function SimpleColorGrader()
+    % Create the main figure
+    hFig = figure('Name', 'Simple Digital Color Grader', ...
+                  'Position', [100 100 820 500], ...
+                  'NumberTitle', 'off', ...
+                  'MenuBar', 'none', ...
+                  'Resize', 'off');
 
-    % Properties that correspond to app components
-    properties (Access = public)
-        UIFigure         matlab.ui.Figure
-        OriginalPanel    matlab.ui.container.Panel
-        PreviewPanel     matlab.ui.container.Panel
-        OriginalAxes     matlab.graphics.axis.Axes
-        PreviewAxes      matlab.graphics.axis.Axes
-        LoadButton       matlab.ui.control.Button
-        SaveButton    matlab.ui.control.Button
-        ResetButton   matlab.ui.control.Button
-        BrightnessLabel matlab.ui.control.Label
-        BrightnessSlider matlab.ui.control.Slider
+    % Create data structure to hold handles and images
+    handles.OriginalImage = [];
+    handles.CurrentImage = [];
+
+    % Create UI Panels
+    hOriginalPanel = uipanel(hFig, 'Title', 'Original Image', 'Position', [0.025 0.24 0.46 0.72]);
+    hPreviewPanel = uipanel(hFig, 'Title', 'Preview', 'Position', [0.515 0.24 0.46 0.72]);
+
+    % Create Axes
+    handles.OriginalAxes = axes('Parent', hOriginalPanel, 'Position', [0 0 1 1]);
+    handles.PreviewAxes = axes('Parent', hPreviewPanel, 'Position', [0 0 1 1]);
+    axis(handles.OriginalAxes, 'off');
+    axis(handles.PreviewAxes, 'off');
+
+    % Create Buttons
+    uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Load Image', ...
+              'Position', [40, 70, 100, 22], ...
+              'Callback', @LoadButtonPushed);
+    uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Save Image', ...
+              'Position', [160, 70, 100, 22], ...
+              'Callback', @SaveButtonPushed);
+    handles.ResetButton = uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Reset', ...
+                                    'Position', [280, 70, 100, 22], ...
+                                    'Callback', @ResetButtonPushed);
+
+    % Create Slider and Label
+    uicontrol(hFig, 'Style', 'text', 'String', 'Brightness', ...
+              'Position', [40, 30, 100, 22]);
+    handles.BrightnessSlider = uicontrol(hFig, 'Style', 'slider', ...
+                                         'Min', -100, 'Max', 100, 'Value', 0, ...
+                                         'Position', [160, 40, 640, 20]);
+
+    % Store handles structure
+    guidata(hFig, handles);
+
+    % --- Nested Callback Functions ---
+
+    function LoadButtonPushed(~, ~)
+        handles = guidata(hFig);
+        [file, path] = uigetfile({'*.jpg;*.png;*.bmp', 'Image Files'}, 'Select Image');
+        if isequal(file, 0)
+            disp('User canceled selection');
+            return;
+        end
+
+        fullPath = fullfile(path, file);
+        try
+            img = imread(fullPath);
+            handles.OriginalImage = img;
+            handles.CurrentImage = img;
+            imshow(handles.OriginalAxes, handles.OriginalImage);
+            imshow(handles.PreviewAxes, handles.CurrentImage);
+            handles.BrightnessSlider.Value = 0;
+            guidata(hFig, handles);
+        catch ME
+            msgbox(['Cannot load image: ' ME.message], 'Load Error', 'error');
+        end
     end
 
-    % Properties that store data
-    properties (Access = public)
-        OriginalImage % Stores the original image data
-        CurrentImage  % Stores the currently displayed (processed) image data
+    function SaveButtonPushed(~, ~)
+        handles = guidata(hFig);
+        if isempty(handles.CurrentImage)
+            msgbox('No image to save.', 'Save Error', 'error');
+            return;
+        end
+
+        [file, path] = uiputfile({'*.png', 'PNG Image'}, 'Save Image');
+        if isequal(file, 0)
+            disp('User canceled save');
+            return;
+        end
+
+        fullPath = fullfile(path, file);
+        imwrite(handles.CurrentImage, fullPath);
     end
 
-    % App creation and deletion
-    methods (Access = private)
-
-        % Create UI components
-        function createComponents(app)
-
-            % Create UIFigure and hide until all components are created
-            app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Position = [100 100 820 500];
-            app.UIFigure.Name = 'Simple Digital Color Grader';
-
-            % Create OriginalPanel
-            app.OriginalPanel = uipanel(app.UIFigure);
-            app.OriginalPanel.Title = 'Original Image';
-            app.OriginalPanel.Position = [20 120 380 360];
-
-            % Create OriginalAxes
-            app.OriginalAxes = axes('Parent', app.OriginalPanel, 'OuterPosition', [0 0 1 1]);
-            app.OriginalAxes.XTick = [];
-            app.OriginalAxes.YTick = [];
-
-            % Create PreviewPanel
-            app.PreviewPanel = uipanel(app.UIFigure);
-            app.PreviewPanel.Title = 'Preview';
-            app.PreviewPanel.Position = [420 120 380 360];
-
-            % Create PreviewAxes
-            app.PreviewAxes = axes('Parent', app.PreviewPanel, 'OuterPosition', [0 0 1 1]);
-            app.PreviewAxes.XTick = [];
-            app.PreviewAxes.YTick = [];
-
-            % Create LoadButton
-            app.LoadButton = uibutton(app.UIFigure, 'push');
-            app.LoadButton.ButtonPushedFcn = createCallbackFcn(app, @LoadButtonPushed, true);
-            app.LoadButton.Text = 'Load Image';
-            app.LoadButton.Position = [40, 70, 100, 22];
-
-            % Create SaveButton
-            app.SaveButton = uibutton(app.UIFigure, 'push');
-            app.SaveButton.ButtonPushedFcn = createCallbackFcn(app, @SaveButtonPushed, true);
-            app.SaveButton.Text = 'Save Image';
-            app.SaveButton.Position = [160, 70, 100, 22];
-
-            % Create ResetButton
-            app.ResetButton = uibutton(app.UIFigure, 'push');
-            app.ResetButton.ButtonPushedFcn = createCallbackFcn(app, @ResetButtonPushed, true);
-            app.ResetButton.Text = 'Reset';
-            app.ResetButton.Position = [280, 70, 100, 22];
-
-            % Create BrightnessLabel
-            app.BrightnessLabel = uilabel(app.UIFigure);
-            app.BrightnessLabel.Text = 'Brightness';
-            app.BrightnessLabel.Position = [40, 30, 100, 22];
-
-            % Create BrightnessSlider
-            app.BrightnessSlider = uislider(app.UIFigure);
-            app.BrightnessSlider.Limits = [-100 100];
-            app.BrightnessSlider.Value = 0;
-            app.BrightnessSlider.Position = [160, 40, 640, 3];
-
-            % Show the figure after all components are created
-            app.UIFigure.Visible = 'on';
-        end
-
-    end
-
-    % Callbacks that handle component events
-    methods (Access = private)
-
-        % Code that executes after component creation
-        function startupFcn(app)
-
-        end
-
-        % "Load Image" button pushed function
-        function LoadButtonPushed(app, event)
-            [file, path] = uigetfile({'*.jpg;*.png;*.bmp', 'Image Files'}, 'Select Image');
-            if isequal(file, 0)
-                disp('User canceled selection');
-            else
-                fullPath = fullfile(path, file);
-                try
-                    % Read image
-                    img = imread(fullPath);
-
-                    % Store image in app properties
-                    app.OriginalImage = img;
-                    app.CurrentImage = img;
-
-                    % Display image on both axes
-                    imshow(app.OriginalAxes, app.OriginalImage);
-                    imshow(app.PreviewAxes, app.CurrentImage);
-
-                    % Reset slider
-                    app.BrightnessSlider.Value = 0;
-
-                catch ME
-                    uialert(app.UIFigure, ['Cannot load image: ' ME.message], 'Load Error');
-                end
-            end
-        end
-
-        % "Save Image" button pushed function
-        function SaveButtonPushed(app, event)
-            if isempty(app.CurrentImage)
-                uialert(app.UIFigure, 'No image to save.', 'Save Error');
-                return;
-            end
-            [file, path] = uiputfile({'*.png', 'PNG Image'}, 'Save Image');
-            if isequal(file, 0)
-                disp('User canceled save');
-            else
-                fullPath = fullfile(path, file);
-                imwrite(app.CurrentImage, fullPath);
-            end
-        end
-
-        % "Reset" button pushed function
-        function ResetButtonPushed(app, event)
-            if ~isempty(app.OriginalImage)
-                app.CurrentImage = app.OriginalImage;
-                imshow(app.PreviewAxes, app.CurrentImage);
-                app.BrightnessSlider.Value = 0;
-            end
-        end
-
-    end
-
-
-    % App Designer initialization
-    methods (Access = public)
-
-        % Construct app
-        function app = SimpleColorGrader()
-
-            % Create and configure components
-            createComponents(app)
-
-            % Register the app with App Designer
-            registerApp(app, app.UIFigure)
-
-            % Execute the startup function
-            runStartupFcn(app, @startupFcn)
-
-            if nargout == 0
-                clear app
-            end
-        end
-
-        % Code that executes before app deletion
-        function delete(app)
-
-            % Delete UIFigure when app is deleted
-            delete(app.UIFigure)
+    function ResetButtonPushed(~, ~)
+        handles = guidata(hFig);
+        if ~isempty(handles.OriginalImage)
+            handles.CurrentImage = handles.OriginalImage;
+            imshow(handles.PreviewAxes, handles.CurrentImage);
+            handles.BrightnessSlider.Value = 0;
+            guidata(hFig, handles);
         end
     end
 end
