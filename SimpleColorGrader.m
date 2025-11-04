@@ -3,7 +3,6 @@ classdef SimpleColorGrader < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         UIFigure      matlab.ui.Figure
-        GridLayout    matlab.ui.container.GridLayout
         OriginalAxes  matlab.ui.control.UIAxes
         PreviewAxes   matlab.ui.control.UIAxes
         LoadButton    matlab.ui.control.Button
@@ -27,59 +26,47 @@ classdef SimpleColorGrader < matlab.apps.AppBase
 
             % Create UIFigure and hide until all components are created
             app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Position = [100 100 800 600];
+            app.UIFigure.Position = [100 100 820 500];
             app.UIFigure.Name = 'Simple Digital Color Grader';
 
-            % Create GridLayout
-            app.GridLayout = uigridlayout(app.UIFigure);
-            app.GridLayout.ColumnWidth = {'1x', '1x', '1x', 200};
-            app.GridLayout.RowHeight = {'1x', 'fit', 'fit'};
-
             % Create OriginalAxes
-            app.OriginalAxes = uiaxes(app.GridLayout);
+            app.OriginalAxes = uiaxes(app.UIFigure);
             title(app.OriginalAxes, 'Original Image')
-            app.OriginalAxes.Layout.Row = 1;
-            app.OriginalAxes.Layout.Column = [1 2];
+            app.OriginalAxes.Position = [20 120 380 360];
 
             % Create PreviewAxes
-            app.PreviewAxes = uiaxes(app.GridLayout);
+            app.PreviewAxes = uiaxes(app.UIFigure);
             title(app.PreviewAxes, 'Preview')
-            app.PreviewAxes.Layout.Row = 1;
-            app.PreviewAxes.Layout.Column = [3 4];
+            app.PreviewAxes.Position = [420 120 380 360];
 
             % Create LoadButton
-            app.LoadButton = uibutton(app.GridLayout, 'push');
+            app.LoadButton = uibutton(app.UIFigure, 'push');
             app.LoadButton.ButtonPushedFcn = createCallbackFcn(app, @LoadButtonPushed, true);
             app.LoadButton.Text = 'Load Image';
-            app.LoadButton.Layout.Row = 2;
-            app.LoadButton.Layout.Column = 1;
+            app.LoadButton.Position = [40, 70, 100, 22];
 
             % Create SaveButton
-            app.SaveButton = uibutton(app.GridLayout, 'push');
+            app.SaveButton = uibutton(app.UIFigure, 'push');
             app.SaveButton.ButtonPushedFcn = createCallbackFcn(app, @SaveButtonPushed, true);
             app.SaveButton.Text = 'Save Image';
-            app.SaveButton.Layout.Row = 2;
-            app.SaveButton.Layout.Column = 2;
+            app.SaveButton.Position = [160, 70, 100, 22];
 
             % Create ResetButton
-            app.ResetButton = uibutton(app.GridLayout, 'push');
+            app.ResetButton = uibutton(app.UIFigure, 'push');
             app.ResetButton.ButtonPushedFcn = createCallbackFcn(app, @ResetButtonPushed, true);
             app.ResetButton.Text = 'Reset';
-            app.ResetButton.Layout.Row = 2;
-            app.ResetButton.Layout.Column = 3;
+            app.ResetButton.Position = [280, 70, 100, 22];
 
             % Create BrightnessLabel
-            app.BrightnessLabel = uilabel(app.GridLayout);
+            app.BrightnessLabel = uilabel(app.UIFigure);
             app.BrightnessLabel.Text = 'Brightness';
-            app.BrightnessLabel.Layout.Row = 3;
-            app.BrightnessLabel.Layout.Column = 1;
+            app.BrightnessLabel.Position = [40, 30, 100, 22];
 
             % Create BrightnessSlider
-            app.BrightnessSlider = uislider(app.GridLayout);
+            app.BrightnessSlider = uislider(app.UIFigure);
             app.BrightnessSlider.Limits = [-100 100];
             app.BrightnessSlider.Value = 0;
-            app.BrightnessSlider.Layout.Row = 3;
-            app.BrightnessSlider.Layout.Column = [2 4];
+            app.BrightnessSlider.Position = [160, 40, 640, 3];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';
