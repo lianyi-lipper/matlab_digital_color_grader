@@ -1,141 +1,141 @@
 function SimpleColorGrader()
-    % ´´½¨Ö÷´°¿Ú
-    % µ÷Õû´°¿Ú´óĞ¡Îª 1000x600 ÒÔÈİÄÉ¸üÇåÎúµÄ²¼¾Ö
+    % åˆ›å»ºä¸»çª—å£
+    % è°ƒæ•´çª—å£å¤§å°ä¸º 1000x600 ä»¥å®¹çº³æ›´æ¸…æ™°çš„å¸ƒå±€
     hFig = figure('Name', 'Simple Color Grader', ...
         'Position', [100 100 1000 600], ...
         'NumberTitle', 'off', ...
         'MenuBar', 'figure', ...
         'Resize', 'off');
 
-    % === ÔÚÕâÀïÌí¼Ó²Ëµ¥À¸´úÂë ===
-    hMenuHelp = uimenu(hFig, 'Label', '°ïÖú');
-    uimenu(hMenuHelp, 'Label', 'Ê¹ÓÃËµÃ÷', 'Callback', @ShowHelpCallback);
-    uimenu(hMenuHelp, 'Label', '¹ØÓÚ', 'Callback', @ShowAboutCallback);
-    % === ²Ëµ¥À¸´úÂë½áÊø ===
+    % === åœ¨è¿™é‡Œæ·»åŠ èœå•æ ä»£ç  ===
+    hMenuHelp = uimenu(hFig, 'Label', 'å¸®åŠ©');
+    uimenu(hMenuHelp, 'Label', 'ä½¿ç”¨è¯´æ˜', 'Callback', @ShowHelpCallback);
+    uimenu(hMenuHelp, 'Label', 'å…³äº', 'Callback', @ShowAboutCallback);
+    % === èœå•æ ä»£ç ç»“æŸ ===
 
-    % ´´½¨ÓÃÓÚ´æ´¢¾ä±úºÍÍ¼ÏñµÄÊı¾İ½á¹¹
+    % åˆ›å»ºç”¨äºå­˜å‚¨å¥æŸ„å’Œå›¾åƒçš„æ•°æ®ç»“æ„
     handles.OriginalImage = [];
     handles.CurrentImage = [];
 
-    % === ²¼¾ÖÇøÓò»®·Ö ===
-    % ¶¥²¿£ºÍ¼ÏñÏÔÊ¾Çø (Õ¼±ÈÔ¼ 65%)
-    % µ×²¿£º¿ØÖÆÃæ°åÇø (Õ¼±ÈÔ¼ 30%)
+    % === å¸ƒå±€åŒºåŸŸåˆ’åˆ† ===
+    % é¡¶éƒ¨ï¼šå›¾åƒæ˜¾ç¤ºåŒº (å æ¯”çº¦ 65%)
+    % åº•éƒ¨ï¼šæ§åˆ¶é¢æ¿åŒº (å æ¯”çº¦ 30%)
     
-    % 1. Í¼ÏñÃæ°å (µ÷Õû¸ß¶ÈÒÔÌÚ³ö¿Õ¼ä¸ø¿ØÖÆÌ¨)
-    hOriginalPanel = uipanel(hFig, 'Title', 'Ô­Ê¼Í¼Ïñ', 'Position', [0.02 0.40 0.47 0.58]);
-    hPreviewPanel = uipanel(hFig, 'Title', 'Ô¤ÀÀ½á¹û', 'Position', [0.51 0.40 0.47 0.58]);
+    % 1. å›¾åƒé¢æ¿ (è°ƒæ•´é«˜åº¦ä»¥è…¾å‡ºç©ºé—´ç»™æ§åˆ¶å°)
+    hOriginalPanel = uipanel(hFig, 'Title', 'åŸå§‹å›¾åƒ', 'Position', [0.02 0.40 0.47 0.58]);
+    hPreviewPanel = uipanel(hFig, 'Title', 'é¢„è§ˆç»“æœ', 'Position', [0.51 0.40 0.47 0.58]);
 
-    % ´´½¨×ø±êÖá
+    % åˆ›å»ºåæ ‡è½´
     handles.OriginalAxes = axes('Parent', hOriginalPanel, 'Position', [0 0 1 1]);
     handles.PreviewAxes = axes('Parent', hPreviewPanel, 'Position', [0 0 1 1]);
     axis(handles.OriginalAxes, 'off');
     axis(handles.PreviewAxes, 'off');
 
-    % 2. ¿ØÖÆÃæ°å (Ê¹ÓÃ uipanel Í³Ò»¹ÜÀí - Ôö¼Ó¸ß¶È)
-    hControlPanel = uipanel(hFig, 'Title', 'µ÷É«¿ØÖÆÌ¨', 'Position', [0.02 0.02 0.96 0.36]);
+    % 2. æ§åˆ¶é¢æ¿ (ä½¿ç”¨ uipanel ç»Ÿä¸€ç®¡ç† - å¢åŠ é«˜åº¦)
+    hControlPanel = uipanel(hFig, 'Title', 'è°ƒè‰²æ§åˆ¶å°', 'Position', [0.02 0.02 0.96 0.36]);
 
-    % --- µÚÒ»ĞĞ£º¹¦ÄÜ°´Å¥ (Y=170) ---
-    uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', '¼ÓÔØÍ¼Æ¬', ...
+    % --- ç¬¬ä¸€è¡Œï¼šåŠŸèƒ½æŒ‰é’® (Y=170) ---
+    uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', 'åŠ è½½å›¾ç‰‡', ...
         'Position', [40, 170, 100, 30], ...
         'Callback', @LoadButtonPushed);
     
-    % ¼ÓÔØÊ¾Àı
-    uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', '¼ÓÔØÊ¾Àı', ...
+    % åŠ è½½ç¤ºä¾‹
+    uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', 'åŠ è½½ç¤ºä¾‹', ...
         'Position', [150, 170, 100, 30], ...
         'Callback', @LoadExampleButtonPushed);
 
-    uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', '±£´æÍ¼Æ¬', ...
+    uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', 'ä¿å­˜å›¾ç‰‡', ...
         'Position', [260, 170, 100, 30], ...
         'Callback', @SaveButtonPushed);
         
-    handles.ResetButton = uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', 'ÖØÖÃËùÓĞ', ...
+    handles.ResetButton = uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', 'é‡ç½®æ‰€æœ‰', ...
         'Position', [370, 170, 100, 30], ...
         'Callback', @ResetButtonPushed);
 
-    % --- µÚ¶şĞĞ£º»ù´¡µ÷Õû (ÁÁ¶È¡¢¶Ô±È¶È¡¢±¥ºÍ¶È) (Y=120) ---
-    % ÁÁ¶È
-    uicontrol(hControlPanel, 'Style', 'text', 'String', 'ÁÁ¶È', ...
+    % --- ç¬¬äºŒè¡Œï¼šåŸºç¡€è°ƒæ•´ (äº®åº¦ã€å¯¹æ¯”åº¦ã€é¥±å’Œåº¦) (Y=120) ---
+    % äº®åº¦
+    uicontrol(hControlPanel, 'Style', 'text', 'String', 'äº®åº¦', ...
         'Position', [40, 120, 60, 20], 'HorizontalAlignment', 'right');
     handles.BrightnessSlider = uicontrol(hControlPanel, 'Style', 'slider', ...
         'Min', -100, 'Max', 100, 'Value', 0, ...
         'Position', [110, 120, 180, 20]);
 
-    % ¶Ô±È¶È
-    uicontrol(hControlPanel, 'Style', 'text', 'String', '¶Ô±È¶È', ...
+    % å¯¹æ¯”åº¦
+    uicontrol(hControlPanel, 'Style', 'text', 'String', 'å¯¹æ¯”åº¦', ...
         'Position', [350, 120, 60, 20], 'HorizontalAlignment', 'right');
     handles.ContrastSlider = uicontrol(hControlPanel, 'Style', 'slider', ...
         'Min', 0, 'Max', 2, 'Value', 1, ...
         'Position', [420, 120, 180, 20]);
 
-    % ±¥ºÍ¶È
-    uicontrol(hControlPanel, 'Style', 'text', 'String', '±¥ºÍ¶È', ...
+    % é¥±å’Œåº¦
+    uicontrol(hControlPanel, 'Style', 'text', 'String', 'é¥±å’Œåº¦', ...
         'Position', [660, 120, 60, 20], 'HorizontalAlignment', 'right');
     handles.SaturationSlider = uicontrol(hControlPanel, 'Style', 'slider', ...
         'Min', 0, 'Max', 2, 'Value', 1, ...
         'Position', [730, 120, 180, 20]);
 
-    % --- µÚÈıĞĞ£ºĞ§¹ûÓëÔöÇ¿ (Èñ¶È¡¢¿ÅÁ£¡¢×Ô¶¯) (Y=70) ---
-    % Èñ¶È
-    uicontrol(hControlPanel, 'Style', 'text', 'String', 'Èñ¶È', ...
+    % --- ç¬¬ä¸‰è¡Œï¼šæ•ˆæœä¸å¢å¼º (é”åº¦ã€é¢—ç²’ã€è‡ªåŠ¨) (Y=70) ---
+    % é”åº¦
+    uicontrol(hControlPanel, 'Style', 'text', 'String', 'é”åº¦', ...
         'Position', [40, 70, 60, 20], 'HorizontalAlignment', 'right');
     handles.SharpnessSlider = uicontrol(hControlPanel, 'Style', 'slider', ...
         'Min', -1, 'Max', 1, 'Value', 0, ...
         'Position', [110, 70, 180, 20]);
 
-    % ½ºÆ¬¿ÅÁ£
-    uicontrol(hControlPanel, 'Style', 'text', 'String', '½ºÆ¬¿ÅÁ£', ...
+    % èƒ¶ç‰‡é¢—ç²’
+    uicontrol(hControlPanel, 'Style', 'text', 'String', 'èƒ¶ç‰‡é¢—ç²’', ...
         'Position', [350, 70, 60, 20], 'HorizontalAlignment', 'right');
     handles.GrainSlider = uicontrol(hControlPanel, 'Style', 'slider', ...
         'Min', 0, 'Max', 0.1, 'Value', 0, ...
         'Position', [420, 70, 180, 20]);
 
-    % Ò»¼üÔöÇ¿
+    % ä¸€é”®å¢å¼º
     handles.HistEqCheckbox = uicontrol(hControlPanel, 'Style', 'checkbox', ...
-        'String', 'Ò»¼üÔöÇ¿ (Ö±·½Í¼¾ùºâ)', ...
+        'String', 'ä¸€é”®å¢å¼º (ç›´æ–¹å›¾å‡è¡¡)', ...
         'Value', 0, ...
         'Position', [730, 70, 200, 20]);
 
-    % --- µÚËÄĞĞ£º¸ß¼¶·ÖÎö (±ßÔµ¡¢·Ö¸î¡¢Í³¼Æ) (Y=20) ---
-    uicontrol(hControlPanel, 'Style', 'text', 'String', '¸ß¼¶·ÖÎö:', ...
+    % --- ç¬¬å››è¡Œï¼šé«˜çº§åˆ†æ (è¾¹ç¼˜ã€åˆ†å‰²ã€ç»Ÿè®¡) (Y=20) ---
+    uicontrol(hControlPanel, 'Style', 'text', 'String', 'é«˜çº§åˆ†æ:', ...
         'Position', [40, 20, 60, 20], 'HorizontalAlignment', 'right', 'FontWeight', 'bold');
     
-    % ±ßÔµ¼ì²â
+    % è¾¹ç¼˜æ£€æµ‹
     handles.EdgeCheckbox = uicontrol(hControlPanel, 'Style', 'checkbox', ...
-        'String', '±ßÔµ¼ì²â (Canny)', ...
+        'String', 'è¾¹ç¼˜æ£€æµ‹ (Canny)', ...
         'Value', 0, ...
         'Position', [120, 20, 120, 20]);
         
-    % Í¼Ïñ·Ö¸î
+    % å›¾åƒåˆ†å‰²
     handles.SegCheckbox = uicontrol(hControlPanel, 'Style', 'checkbox', ...
-        'String', 'Í¼Ïñ·Ö¸î (Otsu)', ...
+        'String', 'å›¾åƒåˆ†å‰² (Otsu)', ...
         'Value', 0, ...
         'Position', [250, 20, 120, 20]);
 
-    % ÌØÕ÷ÌáÈ¡°´Å¥
-    uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', 'ÏÔÊ¾Í¼ÏñÍ³¼Æ', ...
+    % ç‰¹å¾æå–æŒ‰é’®
+    uicontrol(hControlPanel, 'Style', 'pushbutton', 'String', 'æ˜¾ç¤ºå›¾åƒç»Ÿè®¡', ...
         'Position', [400, 15, 100, 30], ...
         'Callback', @ShowStatsButtonPushed);
 
-    % ´æ´¢ handles ½á¹¹
-    guidata(hFig, handles); % ±£´æÒ»´Î handles£¬È·±£»¬¿éÒÑ´´½¨
+    % å­˜å‚¨ handles ç»“æ„
+    guidata(hFig, handles); % ä¿å­˜ä¸€æ¬¡ handlesï¼Œç¡®ä¿æ»‘å—å·²åˆ›å»º
 
-    % --- °ó¶¨¼àÌıÆ÷ÒÔÊµÏÖÊµÊ±Ô¤ÀÀ ---
-    % ¸æËß MATLAB£¬Ö»ÒªÕâĞ©»¬¿éµÄÖµÔÚ±ä£¬¾ÍÈ¥µ÷ÓÃ @UpdatePreview
+    % --- ç»‘å®šç›‘å¬å™¨ä»¥å®ç°å®æ—¶é¢„è§ˆ ---
+    % å‘Šè¯‰ MATLABï¼Œåªè¦è¿™äº›æ»‘å—çš„å€¼åœ¨å˜ï¼Œå°±å»è°ƒç”¨ @UpdatePreview
     addlistener(handles.BrightnessSlider, 'ContinuousValueChange', @UpdatePreview);
     addlistener(handles.ContrastSlider, 'ContinuousValueChange', @UpdatePreview);
     addlistener(handles.SaturationSlider, 'ContinuousValueChange', @UpdatePreview);
 
     addlistener(handles.SharpnessSlider, 'ContinuousValueChange', @UpdatePreview);
     addlistener(handles.GrainSlider, 'ContinuousValueChange', @UpdatePreview);
-    % ¸´Ñ¡¿òÊ¹ÓÃ 'Callback' ÊôĞÔ£¬µ±Ëü±»µã»÷Ê±£¬Ò²µ÷ÓÃ UpdatePreview
+    % å¤é€‰æ¡†ä½¿ç”¨ 'Callback' å±æ€§ï¼Œå½“å®ƒè¢«ç‚¹å‡»æ—¶ï¼Œä¹Ÿè°ƒç”¨ UpdatePreview
     set(handles.HistEqCheckbox, 'Callback', @UpdatePreview);
     set(handles.EdgeCheckbox, 'Callback', @UpdatePreview);
     set(handles.SegCheckbox, 'Callback', @UpdatePreview);
     function LoadButtonPushed(~, ~)
         handles = guidata(hFig);
-        [file, path] = uigetfile({'*.jpg;*.png;*.bmp', 'Í¼Æ¬ÎÄ¼ş'}, 'Ñ¡ÔñÍ¼Æ¬');
+        [file, path] = uigetfile({'*.jpg;*.png;*.bmp', 'å›¾ç‰‡æ–‡ä»¶'}, 'é€‰æ‹©å›¾ç‰‡');
         if isequal(file, 0)
-            disp('ÓÃ»§È¡ÏûÁËÑ¡Ôñ');
+            disp('ç”¨æˆ·å–æ¶ˆäº†é€‰æ‹©');
             return;
         end
 
@@ -144,8 +144,8 @@ function SimpleColorGrader()
             img = imread(fullPath);
             handles.OriginalImage = img;
 
-            % === ĞÔÄÜÓÅ»¯£º´´½¨²¢´æ´¢ËõÂÔÍ¼ ===
-            % ½«Í¼ÏñËõ·Åµ½¹Ì¶¨¿í¶È800ÏñËØ£¬±£³Ö¸ß¿í±È
+            % === æ€§èƒ½ä¼˜åŒ–ï¼šåˆ›å»ºå¹¶å­˜å‚¨ç¼©ç•¥å›¾ ===
+            % å°†å›¾åƒç¼©æ”¾åˆ°å›ºå®šå®½åº¦800åƒç´ ï¼Œä¿æŒé«˜å®½æ¯”
             preview_width = 800;
             img_height = size(img, 1);
             img_width = size(img, 2);
@@ -154,12 +154,12 @@ function SimpleColorGrader()
             handles.ThumbnailImage = imresize(img, [preview_height, preview_width]);
             % ===================================
 
-            handles.CurrentImage = handles.ThumbnailImage; % ³õÊ¼Ô¤ÀÀÒ²ÓÃËõÂÔÍ¼
+            handles.CurrentImage = handles.ThumbnailImage; % åˆå§‹é¢„è§ˆä¹Ÿç”¨ç¼©ç•¥å›¾
 
             imshow(handles.OriginalImage, 'Parent', handles.OriginalAxes);
-            % imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes); % <--- ÏÂÒ»ĞĞ»á¸²¸ÇËü
+            % imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes); % <--- ä¸‹ä¸€è¡Œä¼šè¦†ç›–å®ƒ
 
-            % ÖØÖÃËùÓĞ»¬¿é
+            % é‡ç½®æ‰€æœ‰æ»‘å—
             handles.BrightnessSlider.Value = 0;
             handles.ContrastSlider.Value = 1;
             handles.SaturationSlider.Value = 1;
@@ -168,19 +168,19 @@ function SimpleColorGrader()
             handles.HistEqCheckbox.Value = 0;
 
         catch ME
-            msgbox(['ÎŞ·¨¼ÓÔØÍ¼Æ¬: ' ME.message], '¼ÓÔØ´íÎó', 'error');
+            msgbox(['æ— æ³•åŠ è½½å›¾ç‰‡: ' ME.message], 'åŠ è½½é”™è¯¯', 'error');
         end
     end
 
-    % ¼ÓÔØÊ¾ÀıÍ¼Æ¬»Øµ÷
+    % åŠ è½½ç¤ºä¾‹å›¾ç‰‡å›è°ƒ
     function LoadExampleButtonPushed(~, ~)
         handles = guidata(hFig);
         try
-            % ¼ÓÔØ MATLAB ÄÚÖÃÍ¼Ïñ
+            % åŠ è½½ MATLAB å†…ç½®å›¾åƒ
             img = imread('peppers.png');
             handles.OriginalImage = img;
 
-            % ´¦ÀíËõÂÔÍ¼
+            % å¤„ç†ç¼©ç•¥å›¾
             preview_width = 800;
             img_height = size(img, 1);
             img_width = size(img, 2);
@@ -191,48 +191,48 @@ function SimpleColorGrader()
 
             imshow(handles.OriginalImage, 'Parent', handles.OriginalAxes);
             
-            % ÖØÖÃ»¬¿é
+            % é‡ç½®æ»‘å—
             ResetControls(handles);
             
             guidata(hFig, handles);
             UpdatePreview();
         catch ME
-            msgbox(['ÎŞ·¨¼ÓÔØÊ¾ÀıÍ¼Æ¬: ' ME.message], '´íÎó', 'error');
+            msgbox(['æ— æ³•åŠ è½½ç¤ºä¾‹å›¾ç‰‡: ' ME.message], 'é”™è¯¯', 'error');
         end
     end
 
     function SaveButtonPushed(~, ~)
         handles = guidata(hFig);
-        if isempty(handles.OriginalImage) % <-- ¸ÄÎª¼ì²é OriginalImage
-            msgbox('Ã»ÓĞ¿É±£´æµÄÍ¼Æ¬¡£', '±£´æ´íÎó', 'error');
+        if isempty(handles.OriginalImage) % <-- æ”¹ä¸ºæ£€æŸ¥ OriginalImage
+            msgbox('æ²¡æœ‰å¯ä¿å­˜çš„å›¾ç‰‡ã€‚', 'ä¿å­˜é”™è¯¯', 'error');
             return;
         end
 
-        [file, path] = uiputfile({'*.png', 'PNG Image'}, '±£´æÍ¼Æ¬');
+        [file, path] = uiputfile({'*.png', 'PNG Image'}, 'ä¿å­˜å›¾ç‰‡');
         if isequal(file, 0)
-            disp('ÓÃ»§È¡ÏûÁË±£´æ');
+            disp('ç”¨æˆ·å–æ¶ˆäº†ä¿å­˜');
             return;
         end
 
         fullPath = fullfile(path, file);
 
-        % === ĞÔÄÜÓÅ»¯£º±£´æÊ±´¦ÀíÈ«·Ö±æÂÊÍ¼Ïñ ===
-        % 1. ÌáÊ¾ÓÃ»§ÕıÔÚ´¦Àí
-        set(hFig, 'Pointer', 'watch'); % Êó±ê±ä¡°Ã¦Âµ¡±
-        drawnow; % Á¢¼´Ë¢ĞÂ½çÃæ
+        % === æ€§èƒ½ä¼˜åŒ–ï¼šä¿å­˜æ—¶å¤„ç†å…¨åˆ†è¾¨ç‡å›¾åƒ ===
+        % 1. æç¤ºç”¨æˆ·æ­£åœ¨å¤„ç†
+        set(hFig, 'Pointer', 'watch'); % é¼ æ ‡å˜â€œå¿™ç¢Œâ€
+        drawnow; % ç«‹å³åˆ·æ–°ç•Œé¢
 
         try
-            % 2. ¶Ô¡°Ô­Í¼¡±µ÷ÓÃ´¦Àí¹ÜÏß
+            % 2. å¯¹â€œåŸå›¾â€è°ƒç”¨å¤„ç†ç®¡çº¿
             img_to_save = ProcessImage(handles.OriginalImage, handles);
 
-            % 3. Ğ´ÈëÈ«·Ö±æÂÊµÄ´¦Àí½á¹û
+            % 3. å†™å…¥å…¨åˆ†è¾¨ç‡çš„å¤„ç†ç»“æœ
             imwrite(img_to_save, fullPath);
 
         catch ME
-            msgbox(['±£´æÊ§°Ü: ' ME.message], '±£´æ´íÎó', 'error');
+            msgbox(['ä¿å­˜å¤±è´¥: ' ME.message], 'ä¿å­˜é”™è¯¯', 'error');
         end
 
-        % 4. »Ö¸´Êó±ê
+        % 4. æ¢å¤é¼ æ ‡
         set(hFig, 'Pointer', 'arrow');
         % ========================================
     end
@@ -240,11 +240,11 @@ function SimpleColorGrader()
     function ResetButtonPushed(~, ~)
         handles = guidata(hFig);
         if ~isempty(handles.OriginalImage)
-            % »Ö¸´ÎªÎ´´¦ÀíµÄËõÂÔÍ¼
-            handles.CurrentImage = handles.ThumbnailImage; % <--- ĞŞ¸Äµã
+            % æ¢å¤ä¸ºæœªå¤„ç†çš„ç¼©ç•¥å›¾
+            handles.CurrentImage = handles.ThumbnailImage; % <--- ä¿®æ”¹ç‚¹
             imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes);
 
-            % ÖØÖÃËùÓĞ»¬¿é
+            % é‡ç½®æ‰€æœ‰æ»‘å—
             handles.BrightnessSlider.Value = 0;
             handles.ContrastSlider.Value = 1;
             handles.SaturationSlider.Value = 1;
@@ -256,24 +256,24 @@ function SimpleColorGrader()
         end
     end
 
-    % ÏÔÊ¾Í³¼ÆĞÅÏ¢»Øµ÷
+    % æ˜¾ç¤ºç»Ÿè®¡ä¿¡æ¯å›è°ƒ
     function ShowStatsButtonPushed(~, ~)
         handles = guidata(hFig);
         if isempty(handles.CurrentImage)
-            msgbox('ÇëÏÈ¼ÓÔØÍ¼Æ¬', 'ÌáÊ¾', 'warn');
+            msgbox('è¯·å…ˆåŠ è½½å›¾ç‰‡', 'æç¤º', 'warn');
             return;
         end
         
-        % »ñÈ¡µ±Ç°´¦ÀíºóµÄÍ¼Ïñ (Ê¹ÓÃËõÂÔÍ¼»òÔ­Í¼¾ù¿É£¬ÕâÀïÓÃ CurrentImage ¼´Ô¤ÀÀÍ¼)
+        % è·å–å½“å‰å¤„ç†åçš„å›¾åƒ (ä½¿ç”¨ç¼©ç•¥å›¾æˆ–åŸå›¾å‡å¯ï¼Œè¿™é‡Œç”¨ CurrentImage å³é¢„è§ˆå›¾)
         img = handles.CurrentImage;
         
-        % ´´½¨ĞÂ´°¿ÚÏÔÊ¾Í³¼Æ
-        hStatsFig = figure('Name', 'Í¼ÏñÌØÕ÷Í³¼Æ', 'NumberTitle', 'off', 'Resize', 'on');
+        % åˆ›å»ºæ–°çª—å£æ˜¾ç¤ºç»Ÿè®¡
+        hStatsFig = figure('Name', 'å›¾åƒç‰¹å¾ç»Ÿè®¡', 'NumberTitle', 'off', 'Resize', 'on');
         
-        % 1. ÏÔÊ¾Ö±·½Í¼
+        % 1. æ˜¾ç¤ºç›´æ–¹å›¾
         subplot(2, 1, 1);
         if size(img, 3) == 3
-            % ²ÊÉ«Í¼Ïñ£º·Ö±ğÏÔÊ¾ R, G, B Ö±·½Í¼
+            % å½©è‰²å›¾åƒï¼šåˆ†åˆ«æ˜¾ç¤º R, G, B ç›´æ–¹å›¾
             hold on;
             imhist(img(:,:,1)); 
             h = findobj(gca,'Type','patch'); set(h,'FaceColor','r','EdgeColor','r','FaceAlpha',0.5);
@@ -282,14 +282,14 @@ function SimpleColorGrader()
             imhist(img(:,:,3)); 
             h = findobj(gca,'Type','patch'); set(h,'FaceColor','b','EdgeColor','b','FaceAlpha',0.5);
             hold off;
-            title('RGB Ö±·½Í¼');
+            title('RGB ç›´æ–¹å›¾');
             legend('Red', 'Green', 'Blue');
         else
             imhist(img);
-            title('»Ò¶ÈÖ±·½Í¼');
+            title('ç°åº¦ç›´æ–¹å›¾');
         end
         
-        % 2. ¼ÆËã²¢ÏÔÊ¾Í³¼ÆÊı¾İ
+        % 2. è®¡ç®—å¹¶æ˜¾ç¤ºç»Ÿè®¡æ•°æ®
         subplot(2, 1, 2);
         axis off;
         
@@ -298,21 +298,21 @@ function SimpleColorGrader()
         std_val = std(img_double(:));
         
         statsText = {
-            ['Í¼Ïñ³ß´ç: ' num2str(size(img, 1)) ' x ' num2str(size(img, 2))];
-            ['Í¨µÀÊı: ' num2str(size(img, 3))];
+            ['å›¾åƒå°ºå¯¸: ' num2str(size(img, 1)) ' x ' num2str(size(img, 2))];
+            ['é€šé“æ•°: ' num2str(size(img, 3))];
             ' ';
-            ['Æ½¾ùÁÁ¶È (Mean): ' num2str(mean_val, '%.4f')];
-            ['±ê×¼²î (Std Dev): ' num2str(std_val, '%.4f')];
+            ['å¹³å‡äº®åº¦ (Mean): ' num2str(mean_val, '%.4f')];
+            ['æ ‡å‡†å·® (Std Dev): ' num2str(std_val, '%.4f')];
             ' ';
-            'ËµÃ÷:';
-            'Æ½¾ùÁÁ¶È·´Ó³Í¼ÏñÕûÌåÃ÷°µ¡£';
-            '±ê×¼²î·´Ó³Í¼Ïñ¶Ô±È¶È»òÏ¸½Ú·á¸»³Ì¶È¡£';
+            'è¯´æ˜:';
+            'å¹³å‡äº®åº¦åæ˜ å›¾åƒæ•´ä½“æ˜æš—ã€‚';
+            'æ ‡å‡†å·®åæ˜ å›¾åƒå¯¹æ¯”åº¦æˆ–ç»†èŠ‚ä¸°å¯Œç¨‹åº¦ã€‚';
         };
         
         text(0.1, 0.5, statsText, 'FontSize', 12, 'Interpreter', 'none');
     end
 
-    % ¸¨Öúº¯Êı£ºÖØÖÃ¿Ø¼ş
+    % è¾…åŠ©å‡½æ•°ï¼šé‡ç½®æ§ä»¶
     function ResetControls(handles)
         handles.BrightnessSlider.Value = 0;
         handles.ContrastSlider.Value = 1;
@@ -324,9 +324,9 @@ function SimpleColorGrader()
         handles.SegCheckbox.Value = 0;
     end
 
-    % --- ºËĞÄ´¦Àí¹ÜÏß (ĞÂº¯Êı) ---
+    % --- æ ¸å¿ƒå¤„ç†ç®¡çº¿ (æ–°å‡½æ•°) ---
     function outputImg = ProcessImage(inputImg, handles)
-        % 1. »ñÈ¡ËùÓĞ¿Ø¼şµÄÖµ
+        % 1. è·å–æ‰€æœ‰æ§ä»¶çš„å€¼
         brightnessVal = handles.BrightnessSlider.Value;
         contrastVal = handles.ContrastSlider.Value;
         saturationVal = handles.SaturationSlider.Value;
@@ -337,15 +337,15 @@ function SimpleColorGrader()
         edgeVal = handles.EdgeCheckbox.Value;
         segVal = handles.SegCheckbox.Value;
 
-        % 2. ´Ó¡°ÊäÈëÍ¼Ïñ¡±¿ªÊ¼´¦Àí
+        % 2. ä»â€œè¾“å…¥å›¾åƒâ€å¼€å§‹å¤„ç†
         img_processed = inputImg;
 
-        % --- 3. Ë³ĞòÓ¦ÓÃĞ§¹û ---
+        % --- 3. é¡ºåºåº”ç”¨æ•ˆæœ ---
 
-        % Ğ§¹û A: ÁÁ¶È
+        % æ•ˆæœ A: äº®åº¦
         img_processed = img_processed + round(brightnessVal);
 
-        % Ğ§¹û B: ¶Ô±È¶È
+        % æ•ˆæœ B: å¯¹æ¯”åº¦
         img_double = im2double(img_processed);
         low_in = (1 - contrastVal) * 0.5;
         high_in = 1 - low_in;
@@ -354,26 +354,26 @@ function SimpleColorGrader()
         img_adjusted = imadjust(img_double, [low_in, high_in], []);
         img_processed = im2uint8(img_adjusted);
 
-        % Ğ§¹û C: ±¥ºÍ¶È
+        % æ•ˆæœ C: é¥±å’Œåº¦
         hsvImg = rgb2hsv(img_processed);
         hsvImg(:,:,2) = hsvImg(:,:,2) * saturationVal;
         hsvImg(:,:,2) = min(hsvImg(:,:,2), 1.0);
         img_processed = hsv2rgb(hsvImg);
         img_processed = im2uint8(img_processed);
 
-        % Ğ§¹û D: Èñ»¯ / Ä£ºı
+        % æ•ˆæœ D: é”åŒ– / æ¨¡ç³Š
         if sharpnessVal > 0
             img_processed = imsharpen(img_processed, 'Amount', sharpnessVal * 2);
         elseif sharpnessVal < 0
             img_processed = imgaussfilt(img_processed, abs(sharpnessVal) * 3);
         end
 
-        % Ğ§¹û E: ½ºÆ¬¿ÅÁ£
+        % æ•ˆæœ E: èƒ¶ç‰‡é¢—ç²’
         if grainVal > 0
             img_processed = imnoise(img_processed, 'gaussian', 0, grainVal);
         end
 
-        % Ğ§¹û F: Ö±·½Í¼¾ùºâ»¯
+        % æ•ˆæœ F: ç›´æ–¹å›¾å‡è¡¡åŒ–
         if histEqVal == 1
             if size(img_processed, 3) == 3
                 hsv_img = rgb2hsv(img_processed);
@@ -385,7 +385,7 @@ function SimpleColorGrader()
             end
         end
 
-        % Ğ§¹û G: ±ßÔµ¼ì²â (»¥³â£ºÈç¹û¿ªÆô£¬¸²¸ÇÖ®Ç°µÄÑÕÉ«½á¹û)
+        % æ•ˆæœ G: è¾¹ç¼˜æ£€æµ‹ (äº’æ–¥ï¼šå¦‚æœå¼€å¯ï¼Œè¦†ç›–ä¹‹å‰çš„é¢œè‰²ç»“æœ)
         if edgeVal == 1
             if size(img_processed, 3) == 3
                 gray_img = rgb2gray(img_processed);
@@ -393,74 +393,74 @@ function SimpleColorGrader()
                 gray_img = img_processed;
             end
             edges = edge(gray_img, 'Canny');
-            % ½«¶şÖµ±ßÔµ×ªÎª¿ÉÊÓ»¯µÄ°×É«ÏßÌõ (uint8 0-255)
+            % å°†äºŒå€¼è¾¹ç¼˜è½¬ä¸ºå¯è§†åŒ–çš„ç™½è‰²çº¿æ¡ (uint8 0-255)
             img_processed = uint8(edges) * 255;
         
-        % Ğ§¹û H: Í¼Ïñ·Ö¸î (»¥³â£ºÈç¹û¿ªÆô±ßÔµ¼ì²âÔò²»ÏÔÊ¾·Ö¸î£¬»òÕßÓÅÏÈÏÔÊ¾±ßÔµ)
+        % æ•ˆæœ H: å›¾åƒåˆ†å‰² (äº’æ–¥ï¼šå¦‚æœå¼€å¯è¾¹ç¼˜æ£€æµ‹åˆ™ä¸æ˜¾ç¤ºåˆ†å‰²ï¼Œæˆ–è€…ä¼˜å…ˆæ˜¾ç¤ºè¾¹ç¼˜)
         elseif segVal == 1
             if size(img_processed, 3) == 3
                 gray_img = rgb2gray(img_processed);
             else
                 gray_img = img_processed;
             end
-            % Otsu ãĞÖµ·Ö¸î
+            % Otsu é˜ˆå€¼åˆ†å‰²
             level = graythresh(gray_img);
             bw = imbinarize(gray_img, level);
             img_processed = uint8(bw) * 255;
         end
 
-        % 4. ·µ»Ø´¦Àí½á¹û
+        % 4. è¿”å›å¤„ç†ç»“æœ
         outputImg = img_processed;
     end
 
-    % --- ºËĞÄ£ºÍ³Ò»¸üĞÂº¯Êı (°æ±¾ 3 - ÓÅ»¯°æ) ---
+    % --- æ ¸å¿ƒï¼šç»Ÿä¸€æ›´æ–°å‡½æ•° (ç‰ˆæœ¬ 3 - ä¼˜åŒ–ç‰ˆ) ---
     function UpdatePreview(~, ~)
-        % 1. »ñÈ¡×îĞÂµÄ handles
+        % 1. è·å–æœ€æ–°çš„ handles
         handles = guidata(hFig);
         if isempty(handles.OriginalImage)
             return;
         end
 
-        % 2.¹Ø¼üÓÅ»¯£ºÖ»´¦Àí¡°ËõÂÔÍ¼¡± 
-        img_to_process = handles.ThumbnailImage; % Ê¹ÓÃËõÂÔÍ¼½øĞĞ´¦Àí
+        % 2.å…³é”®ä¼˜åŒ–ï¼šåªå¤„ç†â€œç¼©ç•¥å›¾â€ 
+        img_to_process = handles.ThumbnailImage; % ä½¿ç”¨ç¼©ç•¥å›¾è¿›è¡Œå¤„ç†
 
-        % 3. µ÷ÓÃºËĞÄ¹ÜÏß
+        % 3. è°ƒç”¨æ ¸å¿ƒç®¡çº¿
         img_processed = ProcessImage(img_to_process, handles);
 
-        % 4. ¸üĞÂ GUI
-        handles.CurrentImage = img_processed; % CurrentImage ÏÖÔÚ´æµÄÊÇ¡°´¦ÀíºóµÄËõÂÔÍ¼¡±
-        imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes); % ÏÔÊ¾
+        % 4. æ›´æ–° GUI
+        handles.CurrentImage = img_processed; % CurrentImage ç°åœ¨å­˜çš„æ˜¯â€œå¤„ç†åçš„ç¼©ç•¥å›¾â€
+        imshow(handles.CurrentImage, 'Parent', handles.PreviewAxes); % æ˜¾ç¤º
         guidata(hFig, handles);
     end
 
-    % --- ²Ëµ¥À¸»Øµ÷º¯Êı ---
+    % --- èœå•æ å›è°ƒå‡½æ•° ---
     function ShowHelpCallback(~, ~)
-        title = 'Ê¹ÓÃËµÃ÷';
+        title = 'ä½¿ç”¨è¯´æ˜';
         msg = {
-            '¡¾»ù´¡²Ù×÷¡¿'
-            '1. µã»÷ [¼ÓÔØÍ¼Æ¬] µ¼Èë±¾µØÍ¼Æ¬£¬»òµã»÷ [¼ÓÔØÊ¾Àı] Ê¹ÓÃ²âÊÔÍ¼¡£'
-            '2. µã»÷ [±£´æÍ¼Æ¬] ½«´¦ÀíºóµÄ½á¹ûµ¼³öÎªÎÄ¼ş¡£'
-            '3. µã»÷ [ÖØÖÃËùÓĞ] »Ö¸´µ½Ô­Ê¼×´Ì¬¡£'
+            'ã€åŸºç¡€æ“ä½œã€‘'
+            '1. ç‚¹å‡» [åŠ è½½å›¾ç‰‡] å¯¼å…¥æœ¬åœ°å›¾ç‰‡ï¼Œæˆ–ç‚¹å‡» [åŠ è½½ç¤ºä¾‹] ä½¿ç”¨æµ‹è¯•å›¾ã€‚'
+            '2. ç‚¹å‡» [ä¿å­˜å›¾ç‰‡] å°†å¤„ç†åçš„ç»“æœå¯¼å‡ºä¸ºæ–‡ä»¶ã€‚'
+            '3. ç‚¹å‡» [é‡ç½®æ‰€æœ‰] æ¢å¤åˆ°åŸå§‹çŠ¶æ€ã€‚'
             ' '
-            '¡¾µ÷É«ÓëÌØĞ§¡¿'
-            '4. ÍÏ¶¯»¬¿éµ÷ÕûÁÁ¶È¡¢¶Ô±È¶È¡¢±¥ºÍ¶È¡¢Èñ¶È¼°½ºÆ¬¿ÅÁ£¡£'
-            '5. ¹´Ñ¡ [Ò»¼üÔöÇ¿] ¿É×Ô¶¯½øĞĞÖ±·½Í¼¾ùºâ»¯£¬¸ÄÉÆ¹âÕÕ¡£'
+            'ã€è°ƒè‰²ä¸ç‰¹æ•ˆã€‘'
+            '4. æ‹–åŠ¨æ»‘å—è°ƒæ•´äº®åº¦ã€å¯¹æ¯”åº¦ã€é¥±å’Œåº¦ã€é”åº¦åŠèƒ¶ç‰‡é¢—ç²’ã€‚'
+            '5. å‹¾é€‰ [ä¸€é”®å¢å¼º] å¯è‡ªåŠ¨è¿›è¡Œç›´æ–¹å›¾å‡è¡¡åŒ–ï¼Œæ”¹å–„å…‰ç…§ã€‚'
             ' '
-            '¡¾¸ß¼¶·ÖÎö¡¿'
-            '6. ¹´Ñ¡ [±ßÔµ¼ì²â] (CannyËã×Ó) »ò [Í¼Ïñ·Ö¸î] (OtsuãĞÖµ) ²é¿´Í¼Ïñ½á¹¹¡£'
-            '   (×¢Òâ£º¿ªÆô·ÖÎöÄ£Ê½Ê±£¬µ÷É«Ğ§¹û½«±»¸²¸Ç)'
-            '7. µã»÷ [ÏÔÊ¾Í¼ÏñÍ³¼Æ] ²é¿´RGBÖ±·½Í¼¡¢Æ½¾ùÁÁ¶È¼°±ê×¼²îÊı¾İ¡£'
+            'ã€é«˜çº§åˆ†æã€‘'
+            '6. å‹¾é€‰ [è¾¹ç¼˜æ£€æµ‹] (Cannyç®—å­) æˆ– [å›¾åƒåˆ†å‰²] (Otsué˜ˆå€¼) æŸ¥çœ‹å›¾åƒç»“æ„ã€‚'
+            '   (æ³¨æ„ï¼šå¼€å¯åˆ†ææ¨¡å¼æ—¶ï¼Œè°ƒè‰²æ•ˆæœå°†è¢«è¦†ç›–)'
+            '7. ç‚¹å‡» [æ˜¾ç¤ºå›¾åƒç»Ÿè®¡] æŸ¥çœ‹RGBç›´æ–¹å›¾ã€å¹³å‡äº®åº¦åŠæ ‡å‡†å·®æ•°æ®ã€‚'
         };
         msgbox(msg, title, 'help');
     end
 
     function ShowAboutCallback(~, ~)
-        title = '¹ØÓÚ';
+        title = 'å…³äº';
         msg = {
-            '×÷Æ·: ¼òÒ×Êı×Öµ÷É«Ì¨ (v1.0)'
-            '¿Î³Ì: MATLABÊµ¼ù»ù´¡'
-            '×÷Õß: [ÌîĞ´ÄãµÄÃû×Ö]'
-            'Ñ§ºÅ: [ÌîĞ´ÄãµÄÑ§ºÅ]'
+            'ä½œå“: ç®€æ˜“æ•°å­—è°ƒè‰²å° (v1.0)'
+            'è¯¾ç¨‹: MATLABå®è·µåŸºç¡€'
+            'ä½œè€…: [å¡«å†™ä½ çš„åå­—]'
+            'å­¦å·: [å¡«å†™ä½ çš„å­¦å·]'
         };
         msgbox(msg, title, 'modal');
     end

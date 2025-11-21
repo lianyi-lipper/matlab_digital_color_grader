@@ -1,0 +1,12 @@
+>> SimpleColorGrader
+错误: 文件:SimpleColorGrader.m 行:4 列:27
+字符串未正常终止。
+
+>> SimpleColorGrader
+错误: 文件:SimpleColorGrader.m 行:348 列:1
+该语句不在任何函数内。
+ (它在终止函数 "ShowAboutCallback" 定义的 END 之后。)
+
+>> SimpleColorGrader
+错误: 文件:SimpleColorGrader.m 行:337 列:4
+函数 "LoadButtonPushed" 已通过 'end' 关闭，但至少有一个其他函数定义未关闭。要在使用嵌套函数时避免混淆，在同一文件中使用两个约定是非法的。
